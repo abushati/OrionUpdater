@@ -4,7 +4,7 @@ from difflib import SequenceMatcher
 import time
 from tkinter import *	
 
-orion = orionsdk.SwisClient("dotnpm02", "abushati","aug2018AB")
+orion = orionsdk.SwisClient("", "","")
 results = orion.query("SELECT Caption,  DisplayName \
 						FROM Orion.Nodes")
 
@@ -63,7 +63,7 @@ def post(deviceToIp,notOnSW):
 	
 
 
-secureCRTnames = open("\\\dot55fs10.dot.nycnet\\UsersHomeDrive\\ABushati\\Desktop\\ipAddesses.txt","r")
+secureCRTnames = open("","r")
 
 for lines in secureCRTnames:
 	if ":" not in lines:
