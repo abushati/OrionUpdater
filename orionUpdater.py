@@ -4,107 +4,68 @@ from difflib import SequenceMatcher
 import time
 from tkinter import *	
 
-orion = orionsdk.SwisClient("", "","")
-results = orion.query("SELECT Caption,  DisplayName \
+orion = orionsdk.SwisClient("dotnpm02", "abushati","aug2018AB")
+results = orion.query("SELECT IPAddress\
 						FROM Orion.Nodes")
 
-listOfNamesOrion = []
+listOfIPOrion = []
 notOnSW = []
-listOfNamesCRT = []
+listOfIPsCRT = []
 inSW = []
-deviceToIp = {}
+IPtoDevice = {}
+communityString = "netOP$RO"
+nodeStatusPolling = "120 seconds"
+collectStatEvery = "10 minutes"
+pollingEngin = "DOTNPM02"
+NodeCategory = "Auto-detected"
+topologyPollingInterval = "30 minutes"
+SNMPPort = "161" #allow 64 bit counter
+SNMPversion = "3"
 
-def checker(rating,counter,listOfNamesOrion,devicesCRT):
-	tempList = []
-	for names in listOfNamesOrion:
-		if (SequenceMatcher("",devicesCRT,names).ratio() >=rating):
-			tempList.append(names)
-	print(devicesCRT,tempList)
-	if len(tempList) == 1:
-		
-		master = Tk()
-		master.geometry("500x200")
-		Label(master, text = devicesCRT).grid(row=0)
-		Button(master, text = tempList[0], command = lambda: inSW.append(tempList[0])).grid(row=3, column=0, sticky=W, pady=4)
-		Button(master, text ="Quit", command = master.destroy).grid(row=3, column=1, sticky=W, pady=4)
 
-		mainloop()
-	elif tempList == []:
-		print("nothing in this list")
-	else:
-		master = Tk()
-		master.geometry("600x100")
-		Label(master, text=devicesCRT).grid(row=0)
-		
-
-		e1 = Entry(master)
-		e2 = Entry(master)
-		num = 0 
-		for i in range(0,len(tempList)):
-			Button(master, text= tempList[i], command = lambda: inSW.append(tempList[i])).grid(row=3, column=num, sticky=W, pady=4)
-
-		
-			num += 1
-		print(inSW)
-		Button(master, text="Quit", command = master.destroy).grid(row=3, column=num, sticky=W, pady=4)
-		print(inSW)
-		mainloop()
-
-def post(deviceToIp,notOnSW):
-	for devices in notOnSW:
-		print(devices + ":" + deviceToIp.get(devices))
+def post(IPtoDevice,notOnSW):
+	for IPs in notOnSW:
+		print(IPs + ":" + IPtoDevice.get(IPs))
 
 
 
 
+secureCRTIPs = open("/Users/arvid/Desktop/ipAddesses.txt","r")
 
-
-	 
-	
-
-
-secureCRTnames = open("","r")
-
-for lines in secureCRTnames:
+for lines in secureCRTIPs:
 	if ":" not in lines:
-		CRTname = lines.strip()
+		CRT = lines.strip()
 	else:
 		device = lines.split(":")[0].strip()
 		deviceIP = lines.split(":")[1].strip()
 		#print(deviceIP)
-		fullName = CRTname + ' ' + device
-		fullName = fullName.replace("-"," ").replace("_"," ").upper().replace("AVE"," ").replace("ST"," ").replace("TH"," ")
-		fullName = fullName.replace(" ","")
-		deviceToIp.update({fullName : deviceIP})
-		print(deviceToIp)
-		if CRTname != "":
-			listOfNamesCRT.append(fullName)
-#print (listOfNamesCRT)
+		fullName = CRT + ' ' + device
+		#fullName = fullName.replace("-"," ").replace("_"," ").upper().replace("AVE"," ").replace("ST"," ").replace("TH"," ")
+		#fullName = fullName.replace(" ","")
+		IPtoDevice.update({deviceIP : fullName })
+		#print(IPtoDevice)
+		if CRT != "":
+			listOfIPsCRT.append(deviceIP)
+print (listOfIPsCRT)
 
 for i in range(0,len(results["results"])):
-	orionName = results["results"][i]["DisplayName"]
-	orionName = orionName.split(".")[0].upper()
-	orionName = orionName.replace("-"," ").replace("_"," ").replace("AVE"," ").replace("ST"," ").replace("TH"," ")
-	orionName = orionName.replace(" ","")
-	if orionName != " ":
-		listOfNamesOrion.append(orionName)
-#print(listOfNamesOrion)
+	orionIP = results["results"][i]["IPAddress"]
+	#print(orionIP)
+	#orionIP = orionIP.split(".")[0].upper().strip()
+	listOfIPOrion.append(orionIP)
 
-for devicesCRT in listOfNamesCRT:
+print(listOfIPOrion)
+
+for IPsCRT in listOfIPsCRT:
 	counter = 0
 	rating = .80
-	if devicesCRT in listOfNamesOrion:
-		inSW.append(devicesCRT)
-		#print(listOfNamesOrion.index(devicesCRT))
-		#print(devicesCRT)
-		#print(listOfNamesOrion[listOfNamesOrion.index(devicesCRT)])
-		listOfNamesOrion.remove(devicesCRT)
-		listOfNamesCRT.remove(devicesCRT)
+	if IPsCRT in listOfIPOrion:
+		inSW.append(IPsCRT)
+		#print(listOfIPOrion.index(IPsCRT))
+		#print(IPsCRT)
+		#print(listOfIPOrion[listOfIPOrion.index(IPsCRT)])
 	else:	
-		pass
-		#checker(rating,counter,listOfNamesOrion,devicesCRT)
-for remainingNamesCRT in (set(listOfNamesCRT) - set(inSW)):
-	notOnSW.append(remainingNamesCRT)
+		notOnSW.append(IPsCRT)
 
 master = Tk()
 scrollbar = Scrollbar(master)
@@ -114,12 +75,35 @@ mylist.config(width = 0)
 
 master.geometry("600x600")
 number = 0
-for items in notOnSW:
-	mylist.insert(END,items)
+for IPs in notOnSW:
+	mylist.insert(END,(IPs,IPtoDevice.get(IPs)))
+	#mylist.insert(END,IPtoDevice.get(IPs))
 	mylist.pack(side = LEFT, fill = BOTH)
 
 	scrollbar.config(command = mylist.yview)
-button = Button(master, text = "SUBMIT",command= lambda: post(deviceToIp,notOnSW))
+button = Button(master, text = "SUBMIT",command= lambda: post(IPtoDevice,notOnSW))
 button.pack()#.grid(row=3, column=3, sticky=W, pady=4)
 
 mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
