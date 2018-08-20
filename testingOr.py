@@ -19,10 +19,11 @@ def main():
     eth_only = [
             x for x
             in results['DiscoveredInterfaces']
-            if x['Caption'].startswith('Gig')]
+            if x['Caption']]
 
-    print(results)
-
+    #print(results)
+    print(eth_only)
+'''
     results2 = swis.invoke(
             'Orion.NPM.Interfaces',
             'AddInterfacesOnNode',
@@ -31,7 +32,7 @@ def main():
             'AddDefaultPollers')
 
     #print(results2)
-
+'''
 
 requests.packages.urllib3.disable_warnings()
 
