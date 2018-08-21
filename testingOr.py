@@ -4,9 +4,9 @@ import requests
 from orionsdk import SwisClient
 
 def main():
-    npm_server = 'dotnpm02'
-    username = 'abushati'
-    password = 'aug2018AB'
+    npm_server = input('What is the server name: ')
+    username = input('What is the username: ')
+    password = input('What is the password: ')
     target_node_ip = '10.156.30.5'
     snmpv3_credential_id = 3
     orion_engine_id = 1
@@ -16,13 +16,14 @@ def main():
 
     # use the results['DiscoveredInterfaces'] for all interfaces
     # or get a subset of interfaces using a comprehension like below
-    eth_only = [
-            x for x
-            in results['DiscoveredInterfaces']
-            if x['Caption']]
+    eth_only = (x for x in results['DiscoveredInterfaces']
+                if "Serial" in x["Caption"] or "Gigabit" in x["Caption"])
+    
+    for x in eth_only:
+        print(x["Caption"])
 
     #print(results)
-    print(eth_only)
+   # print(eth_only)
 '''
     results2 = swis.invoke(
             'Orion.NPM.Interfaces',
